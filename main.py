@@ -1,4 +1,4 @@
-# main.py
+"""Запуск приложения"""
 
 import threading
 from task_manager.gui import run_gui

@@ -1,13 +1,30 @@
+"""Модуль для отправки уведомлений по электронной почте"""
+
 import smtplib
 from email.mime.text import MIMEText
 
 
 class EmailNotifier:
-    def __init__(self, email="mich921@yandex.ru", password="password"):
+    """Класс для отправки уведомлений по электронной почте"""
+
+    def __init__(self, email: str = "mich921@yandex.ru", password: str = "password") -> None:
+        """
+        Инициализация уведомителя
+
+        :param email: Адрес электронной почты отправителя. По умолчанию "mich921@yandex.ru"
+        :param password: Пароль от почтового аккаунта. По умолчанию "password"
+        """
         self.email = email
         self.password = password
 
-    def send_email(self, to_email, subject, message):
+    def send_email(self, to_email: str, subject: str, message: str) -> None:
+        """
+        Отправляет электронное письмо
+
+        :param to_email: Адрес электронной почты получателя
+        :param subject: Тема письма
+        :param message: Текст письма
+        """
         msg = MIMEText(message)
         msg["Subject"] = subject
         msg["From"] = self.email

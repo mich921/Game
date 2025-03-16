@@ -1,5 +1,7 @@
+"""Клиентская часть"""
+
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 from tkcalendar import DateEntry
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -9,7 +11,12 @@ from .task import Task
 
 
 class TaskManagerApp:
-    def __init__(self, root):
+    def __init__(self, root: tk.Tk) -> None:
+        """
+        Инициализация главного окна приложения и основных переменных
+        :param root: Корневое окно приложения
+        :return: None
+        """
         self.root = root
         self.root.title("Менеджер задач")
         self.root.geometry("1000x800")
@@ -23,7 +30,11 @@ class TaskManagerApp:
         self.create_widgets()
         self.update_task_list()
 
-    def create_widgets(self):
+    def create_widgets(self) -> None:
+        """
+        Создание и размещение виджетов на главном окне
+        :return: None
+        """
         # Frame для кнопок управления (включая кнопку сброса сортировки)
         self.top_button_frame = ttk.Frame(self.root)
         self.top_button_frame.pack(fill=tk.X, padx=10, pady=5)
@@ -86,14 +97,67 @@ class TaskManagerApp:
         self.visualize_button = ttk.Button(self.button_frame, text="Визуализация", command=self.visualize_data)
         self.visualize_button.pack(side=tk.LEFT, padx=5)
 
-    def reset_sorting(self):
-        """Сброс сортировки и обновление списка задач."""
+        # Кнопка для импорта из JSON
+        self.import_json_button = ttk.Button(
+            self.button_frame, text="Импорт из JSON", command=self.import_from_json
+        )
+        self.import_json_button.pack(side=tk.LEFT, padx=5)
+
+        # Кнопка для импорта из CSV
+        self.import_csv_button = ttk.Button(
+            self.button_frame, text="Импорт из CSV", command=self.import_from_csv
+        )
+        self.import_csv_button.pack(side=tk.LEFT, padx=5)
+
+    def import_from_json(self) -> None:
+        """
+        Импорт задач из JSON-файла
+        :return: None
+        """
+        file_path = filedialog.askopenfilename(
+            title="Выберите JSON файл",
+            filetypes=[("JSON files", "*.json")]
+        )
+        if file_path:
+            try:
+                self.task_manager.storage.import_from_json(file_path)
+                self.update_task_list()
+                messagebox.showinfo("Успех", "Задачи успешно импортированы из JSON файла")
+            except Exception as e:
+                messagebox.showerror("Ошибка", f"Не удалось импортировать задачи: {e}")
+
+    def import_from_csv(self) -> None:
+        """
+        Импорт задач из CSV-файла
+        :return: None
+        """
+        file_path = filedialog.askopenfilename(
+            title="Выберите CSV файл",
+            filetypes=[("CSV files", "*.csv")]
+        )
+        if file_path:
+            try:
+                self.task_manager.storage.import_from_csv(file_path)
+                self.update_task_list()
+                messagebox.showinfo("Успех", "Задачи успешно импортированы из CSV файла")
+            except Exception as e:
+                messagebox.showerror("Ошибка", f"Не удалось импортировать задачи: {e}")
+
+    def reset_sorting(self) -> None:
+        """
+        Сброс сортировки и обновление списка задач
+        :return: None
+        """
         self.sort_column = None
         self.sort_order = "default"
         self.update_task_list()
 
-    def sort_tasks(self, column):
-        """Сортировка задач по выбранному столбцу."""
+    def sort_tasks(self, column: str) -> None:
+        """
+        Сортировка задач по выбранному столбцу
+        :param column: Название столбца для сортировки
+        :return: None
+        """
         if self.sort_column == column:
             if self.sort_order == "asc":
                 self.sort_order = "desc"
@@ -107,8 +171,11 @@ class TaskManagerApp:
 
         self.update_task_list()
 
-    def open_edit_task_dialog(self):
-        """Открытие окна для редактирования выбранной задачи."""
+    def open_edit_task_dialog(self) -> None:
+        """
+        Открытие окна для редактирования выбранной задачи
+        :return: None
+        """
         # Получение выбранной задачи
         selected_item = self.task_tree.selection()
         if not selected_item:
@@ -159,8 +226,12 @@ class TaskManagerApp:
             self.edit_task_window, text="Сохранить", command=lambda: self.save_edited_task(selected_index)
         ).grid(row=6, column=0, columnspan=2, pady=10)
 
-    def save_edited_task(self, selected_index):
-        """Сохранение изменений в задаче."""
+    def save_edited_task(self, selected_index: int) -> None:
+        """
+        Сохранение изменений в задаче
+        :param selected_index: Индекс задачи в отсортированном списке
+        :return: None
+        """
         # Получение данных из полей ввода
         title = self.edit_title_entry.get()
         description = self.edit_description_entry.get()
@@ -187,8 +258,11 @@ class TaskManagerApp:
         # Закрытие окна редактирования
         self.edit_task_window.destroy()
 
-    def update_task_list(self):
-        """Обновление списка задач с учетом сортировки."""
+    def update_task_list(self) -> None:
+        """
+        Обновление списка задач с учетом сортировки
+        :return: None
+        """
         # Получаем исходный список задач
         self.original_tasks = self.task_manager.get_tasks()
 
@@ -224,7 +298,11 @@ class TaskManagerApp:
                 task.status
             ))
 
-    def open_add_task_dialog(self):
+    def open_add_task_dialog(self) -> None:
+        """
+        Открытие окна для добавления новой задачи
+        :return: None
+        """
         # Окно для добавления новой задачи
         self.add_task_window = tk.Toplevel(self.root)
         self.add_task_window.title("Добавить задачу")
@@ -259,7 +337,11 @@ class TaskManagerApp:
             self.add_task_window, text="Сохранить", command=self.save_task
         ).grid(row=6, column=0, columnspan=2, pady=10)
 
-    def save_task(self):
+    def save_task(self) -> None:
+        """
+        Сохранение новой задачи
+        :return: None
+        """
         # Получение данных из полей ввода
         title = self.title_entry.get()
         description = self.description_entry.get()
@@ -278,7 +360,11 @@ class TaskManagerApp:
         # Закрытие окна добавления задачи
         self.add_task_window.destroy()
 
-    def delete_task(self):
+    def delete_task(self) -> None:
+        """
+        Удаление выбранной задачи
+        :return: None
+        """
         # Получение выбранной задачи
         selected_item = self.task_tree.selection()
         if not selected_item:
@@ -292,7 +378,11 @@ class TaskManagerApp:
         # Обновление списка задач
         self.update_task_list()
 
-    def show_completed_report(self):
+    def show_completed_report(self) -> None:
+        """
+        Отображение отчета по выполненным задачам
+        :return: None
+        """
         # Получение выполненных задач
         completed_tasks = [task for task in self.task_manager.get_tasks() if task.status == "Завершено"]
 
@@ -311,9 +401,13 @@ class TaskManagerApp:
                 report_text.insert(tk.END, f"Категория: {task.category}\n")
                 report_text.insert(tk.END, "-" * 40 + "\n")
         else:
-            report_text.insert(tk.END, "Нет выполненных задач.\n")
+            report_text.insert(tk.END, "Нет выполненных задач\n")
 
-    def show_overdue_report(self):
+    def show_overdue_report(self) -> None:
+        """
+        Отображение отчета по просроченным задачам
+        :return: None
+        """
         # Получение просроченных задач
         overdue_tasks = self.task_manager.get_overdue_tasks()
 
@@ -332,9 +426,13 @@ class TaskManagerApp:
                 report_text.insert(tk.END, f"Категория: {task.category}\n")
                 report_text.insert(tk.END, "-" * 40 + "\n")
         else:
-            report_text.insert(tk.END, "Нет просроченных задач.\n")
+            report_text.insert(tk.END, "Нет просроченных задач\n")
 
-    def visualize_data(self):
+    def visualize_data(self) -> None:
+        """
+        Открытие окна для выбора критерия визуализации данных
+        :return: None
+        """
         # Окно для выбора критерия визуализации
         visualize_window = tk.Toplevel(self.root)
         visualize_window.title("Выбор критерия визуализации")
@@ -348,10 +446,16 @@ class TaskManagerApp:
         criteria_combobox.pack(padx=10, pady=5)
 
         # Кнопка для построения графика
-        ttk.Button(visualize_window, text="Построить график",
-                   command=lambda: self._draw_graph(criteria_var.get())).pack(padx=10, pady=10)
+        ttk.Button(
+            visualize_window, text="Построить график", command=lambda: self._draw_graph(criteria_var.get())
+        ).pack(padx=10, pady=10)
 
-    def _draw_graph(self, criteria):
+    def _draw_graph(self, criteria: str) -> None:
+        """
+        Построение графика по выбранному критерию
+        :param criteria: Критерий для визуализации (Категория, Приоритет, Статус)
+        :return: None
+        """
         # Получение данных в зависимости от выбранного критерия
         tasks = self.task_manager.get_tasks()
         data = {}
@@ -399,7 +503,11 @@ class TaskManagerApp:
         canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
 
-def run_gui():
+def run_gui() -> None:
+    """
+    Запуск графического интерфейса приложения
+    :return: None
+    """
     root = tk.Tk()
     TaskManagerApp(root)
     root.mainloop()

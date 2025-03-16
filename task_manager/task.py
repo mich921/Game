@@ -1,10 +1,13 @@
-# task_manager/task.py
+"""Модуль для работы с задачами"""
 
 from datetime import date, datetime
 
 
 class Task:
-    """Класс для работы "Задачами" """
+    """
+    Класс, представляющий задачу.
+    """
+
     DEFAULT_STATUS = 'В работе'
     DEFAULT_PRIORITY = 'Средний'
     DEFAULT_CATEGORY = 'Работа'
@@ -15,18 +18,32 @@ class Task:
 
     def __init__(
             self, title: str, description: str, due_date: date,
-            priority=DEFAULT_PRIORITY, category=DEFAULT_CATEGORY, status=DEFAULT_STATUS
-    ):
+            priority: str = DEFAULT_PRIORITY, category: str = DEFAULT_CATEGORY, status: str = DEFAULT_STATUS
+    ) -> None:
+        """
+        Инициализация задачи
+
+        :param title: Заголовок задачи
+        :param description: Описание задачи
+        :param due_date: Срок выполнения задачи
+        :param priority: Приоритет задачи. По умолчанию "Средний"
+        :param category: Категория задачи. По умолчанию "Работа"
+        :param status: Статус задачи. По умолчанию "В работе"
+        """
         self.title = title
         self.description = description
         self.due_date = due_date
         self.priority = priority
         self.category = category
         self.status = status
-        self.today = date.today()
+        self.created_at = date.today()
 
-    def to_dict(self):
-        """Преобразование к словарю"""
+    def to_dict(self) -> dict[str, date | str | None]:
+        """
+        Преобразует задачу в словарь
+
+        :return: Словарь с данными задачи
+        """
         return {
             "title": self.title,
             "description": self.description,
@@ -38,8 +55,13 @@ class Task:
         }
 
     @classmethod
-    def from_dict(cls, data):
-        """Преобразование из словаря"""
+    def from_dict(cls, data: dict[str, date | str | None]) -> 'Task':
+        """
+        Создает задачу из словаря
+
+        :param data: Словарь с данными задачи
+        :return: Объект задачи
+        """
         return cls(
             title=data["title"],
             description=data["description"],

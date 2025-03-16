@@ -1,13 +1,18 @@
-# task_manager/background_tasks.py
+"""Модуль для автоматической проверки дедлайнов задач"""
 
 import schedule
 import time
 from datetime import datetime
+
 from .task_manager import TaskManager
 from .email_notifier import EmailNotifier
 
 
-def check_deadlines():
+def check_deadlines() -> None:
+    """
+    Проверяет задачи на наличие просроченных дедлайнов и отправляет уведомления
+    Если задача просрочена и не завершена, отправляет уведомление на почту
+    """
     task_manager = TaskManager()
     email_notifier = EmailNotifier()
 
@@ -28,8 +33,12 @@ def check_deadlines():
             email_notifier.send_email("pamagite@yandex.ru", subject, message)
 
 
-def start_background_scheduler():
-    # Проверка дедлайнов каждую минуту (можно изменить на schedule.every().hour и т.д.)
+def start_background_scheduler() -> None:
+    """
+    Запускает фоновый планировщик для проверки дедлайнов
+    Планировщик проверяет задачи каждую минуту
+    """
+    # Проверка дедлайнов каждую минуту
     schedule.every(1).minutes.do(check_deadlines)
 
     # Запуск планировщика в бесконечном цикле

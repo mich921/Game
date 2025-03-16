@@ -1,5 +1,9 @@
+"""Модуль для API взаимодействия с задачами"""
+
 from flask import Flask, jsonify, request
 from datetime import datetime
+from typing import Any
+
 from .task_manager import TaskManager
 from .task import Task
 
@@ -8,10 +12,19 @@ app = Flask(__name__)
 
 
 class TaskAPI:
-    def __init__(self):
+    """Класс для обработки API запросов, связанных с задачами"""
+
+    def __init__(self) -> None:
+        """Инициализация API для работы с задачами"""
         self.task_manager = TaskManager()
 
-    def task_to_dict(self, task):
+    def task_to_dict(self, task: Task) -> dict[str, Any]:
+        """
+        Преобразует задачу в словарь
+
+        :param task: Объект задачи
+        :return: Словарь с данными задачи
+        """
         return {
             "id": id(task),
             "title": task.title,
@@ -23,7 +36,12 @@ class TaskAPI:
             "created_at": task.created_at.isoformat()
         }
 
-    def get_tasks(self):
+    def get_tasks(self) -> jsonify:
+        """
+        Возвращает список задач с возможностью сортировки
+
+        :return: JSON-ответ с отсортированным списком задач
+        """
         sort_column = request.args.get("sort_by", default=None)
         sort_order = request.args.get("order", default="asc")
 
@@ -42,7 +60,12 @@ class TaskAPI:
 
         return jsonify([self.task_to_dict(task) for task in tasks])
 
-    def add_task(self):
+    def add_task(self) -> jsonify:
+        """
+        Добавляет новую задачу
+
+        :return: JSON-ответ с результатом операции
+        """
         data = request.json
         try:
             new_task = Task(
@@ -58,7 +81,13 @@ class TaskAPI:
         except Exception as e:
             return jsonify({"status": "error", "message": str(e)}), 400
 
-    def edit_task(self, task_id):
+    def edit_task(self, task_id: int) -> jsonify:
+        """
+        Редактирует задачу по ID
+
+        :param task_id: ID задачи для редактирования
+        :return: JSON-ответ с результатом операции
+        """
         data = request.json
         try:
             updated_task = Task(
@@ -76,22 +105,43 @@ class TaskAPI:
         except Exception as e:
             return jsonify({"status": "error", "message": str(e)}), 400
 
-    def delete_task(self, task_id):
+    def delete_task(self, task_id: int) -> jsonify:
+        """
+        Удаляет задачу по ID
+
+        :param task_id: ID задачи для удаления
+        :return: JSON-ответ с результатом операции
+        """
         try:
             self.task_manager.delete_task(task_id)
             return jsonify({"status": "success", "message": "Задача удалена"})
         except IndexError:
             return jsonify({"status": "error", "message": "Задача не найдена"}), 404
 
-    def get_completed_tasks(self):
+    def get_completed_tasks(self) -> jsonify:
+        """
+        Возвращает список завершенных задач
+
+        :return: JSON-ответ с завершенными задачами
+        """
         completed_tasks = [task for task in self.task_manager.get_tasks() if task.status == "Завершено"]
         return jsonify([self.task_to_dict(task) for task in completed_tasks])
 
-    def get_overdue_tasks(self):
+    def get_overdue_tasks(self) -> jsonify:
+        """
+        Возвращает список просроченных задач
+
+        :return: JSON-ответ с просроченными задачами
+        """
         overdue_tasks = self.task_manager.get_overdue_tasks()
         return jsonify([self.task_to_dict(task) for task in overdue_tasks])
 
-    def visualize_tasks(self):
+    def visualize_tasks(self) -> jsonify:
+        """
+        Возвращает данные для визуализации задач по критерию
+
+        :return: JSON-ответ с данными для визуализации
+        """
         criteria = request.args.get("criteria", "category")
         tasks = self.task_manager.get_tasks()
 
