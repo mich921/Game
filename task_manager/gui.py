@@ -15,23 +15,39 @@ class TaskManagerApp:
         self.root.geometry("1000x800")
 
         self.task_manager = TaskManager()
+        self.original_tasks = []  # Исходный список задач
+        self.sorted_tasks = []  # Отсортированный список задач
+        self.sort_column = None  # Текущий столбец для сортировки
+        self.sort_order = "default"  # Порядок сортировки: "asc", "desc", "default"
 
         self.create_widgets()
         self.update_task_list()
 
     def create_widgets(self):
+        # Frame для кнопок управления (включая кнопку сброса сортировки)
+        self.top_button_frame = ttk.Frame(self.root)
+        self.top_button_frame.pack(fill=tk.X, padx=10, pady=5)
+
+        # Кнопка сброса сортировки
+        self.reset_sorting_button = ttk.Button(self.top_button_frame, text="Сбросить сортировку", command=self.reset_sorting)
+        self.reset_sorting_button.pack(side=tk.LEFT, padx=5)
+
         # Frame для списка задач
         self.task_list_frame = ttk.Frame(self.root)
         self.task_list_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         # Treeview для отображения задач
-        self.task_tree = ttk.Treeview(self.task_list_frame, columns=("Title", "Description", "Due Date", "Priority", "Category", "Status"), show="headings")
-        self.task_tree.heading("Title", text="Заголовок")
-        self.task_tree.heading("Description", text="Описание")
-        self.task_tree.heading("Due Date", text="Срок выполнения")
-        self.task_tree.heading("Priority", text="Приоритет")
-        self.task_tree.heading("Category", text="Категория")
-        self.task_tree.heading("Status", text="Статус")
+        self.task_tree = ttk.Treeview(
+            self.task_list_frame,
+            columns=("Title", "Description", "Due Date", "Priority", "Category", "Status"),
+            show="headings"
+        )
+        self.task_tree.heading("Title", text="Заголовок", command=lambda: self.sort_tasks("Title"))
+        self.task_tree.heading("Description", text="Описание", command=lambda: self.sort_tasks("Description"))
+        self.task_tree.heading("Due Date", text="Срок выполнения", command=lambda: self.sort_tasks("Due Date"))
+        self.task_tree.heading("Priority", text="Приоритет", command=lambda: self.sort_tasks("Priority"))
+        self.task_tree.heading("Category", text="Категория", command=lambda: self.sort_tasks("Category"))
+        self.task_tree.heading("Status", text="Статус", command=lambda: self.sort_tasks("Status"))
         self.task_tree.pack(fill=tk.BOTH, expand=True)
 
         # Frame для кнопок управления
@@ -62,16 +78,38 @@ class TaskManagerApp:
         self.visualize_button = ttk.Button(self.button_frame, text="Визуализация", command=self.visualize_data)
         self.visualize_button.pack(side=tk.LEFT, padx=5)
 
+    def reset_sorting(self):
+        """Сброс сортировки и обновление списка задач."""
+        self.sort_column = None
+        self.sort_order = "default"
+        self.update_task_list()
+
+    def sort_tasks(self, column):
+        """Сортировка задач по выбранному столбцу."""
+        if self.sort_column == column:
+            if self.sort_order == "asc":
+                self.sort_order = "desc"
+            elif self.sort_order == "desc":
+                self.sort_order = "default"
+            else:
+                self.sort_order = "asc"
+        else:
+            self.sort_column = column
+            self.sort_order = "asc"
+
+        self.update_task_list()
+
     def open_edit_task_dialog(self):
+        """Открытие окна для редактирования выбранной задачи."""
         # Получение выбранной задачи
         selected_item = self.task_tree.selection()
         if not selected_item:
             messagebox.showwarning("Предупреждение", "Выберите задачу для редактирования")
             return
 
-        # Получение ID задачи
-        self.selected_task_id = self.task_tree.index(selected_item[0])
-        task = self.task_manager.get_task(self.selected_task_id)
+        # Получение индекса задачи в отсортированном списке
+        selected_index = self.task_tree.index(selected_item[0])
+        task = self.sorted_tasks[selected_index]
 
         # Окно для редактирования задачи
         self.edit_task_window = tk.Toplevel(self.root)
@@ -109,9 +147,10 @@ class TaskManagerApp:
         self.edit_status_entry.grid(row=5, column=1, padx=5, pady=5)
 
         # Кнопка сохранения изменений
-        ttk.Button(self.edit_task_window, text="Сохранить", command=self.save_edited_task).grid(row=6, column=0, columnspan=2, pady=10)
+        ttk.Button(self.edit_task_window, text="Сохранить", command=lambda: self.save_edited_task(selected_index)).grid(row=6, column=0, columnspan=2, pady=10)
 
-    def save_edited_task(self):
+    def save_edited_task(self, selected_index):
+        """Сохранение изменений в задаче."""
         # Получение данных из полей ввода
         title = self.edit_title_entry.get()
         description = self.edit_description_entry.get()
@@ -123,8 +162,14 @@ class TaskManagerApp:
         # Создание обновленной задачи
         updated_task = Task(title, description, due_date, priority, category, status)
 
-        # Сохранение изменений
-        self.task_manager.edit_task(self.selected_task_id, updated_task)
+        # Получение задачи из отсортированного списка
+        task = self.sorted_tasks[selected_index]
+
+        # Нахождение индекса задачи в исходном списке
+        original_index = self.original_tasks.index(task)
+
+        # Сохранение изменений в исходном списке
+        self.task_manager.edit_task(original_index, updated_task)
 
         # Обновление списка задач
         self.update_task_list()
@@ -133,13 +178,31 @@ class TaskManagerApp:
         self.edit_task_window.destroy()
 
     def update_task_list(self):
+        """Обновление списка задач с учетом сортировки."""
+        # Получаем исходный список задач
+        self.original_tasks = self.task_manager.get_tasks()
+
+        # Создаем копию списка для сортировки
+        self.sorted_tasks = self.original_tasks.copy()
+
+        # Сортировка задач (если требуется)
+        if self.sort_column and self.sort_order != "default":
+            reverse = self.sort_order == "desc"
+            if self.sort_column == "Due Date":
+                self.sorted_tasks.sort(key=lambda x: x.due_date, reverse=reverse)
+            elif self.sort_column == "Priority":
+                self.sorted_tasks.sort(key=lambda x: Task.ALL_PRIORITIES.index(x.priority), reverse=reverse)
+            elif self.sort_column == "Status":
+                self.sorted_tasks.sort(key=lambda x: Task.ALL_STATUSES.index(x.status), reverse=reverse)
+            else:
+                self.sorted_tasks.sort(key=lambda x: getattr(x, self.sort_column.lower().replace(" ", "_")), reverse=reverse)
+
         # Очистка текущего списка задач
         for item in self.task_tree.get_children():
             self.task_tree.delete(item)
 
-        # Загрузка задач из TaskManager
-        tasks = self.task_manager.get_tasks()
-        for task in tasks:
+        # Загрузка задач в Treeview
+        for task in self.sorted_tasks:
             self.task_tree.insert("", tk.END, values=(
                 task.title,
                 task.description,
