@@ -1,6 +1,3 @@
-# task_manager/analytics.py
-
-from datetime import datetime
 import matplotlib.pyplot as plt
 
 class Analytics:

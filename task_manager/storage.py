@@ -2,7 +2,7 @@
 
 import json
 import os
-from datetime import datetime
+from datetime import date
 from .task import Task
 
 
@@ -26,7 +26,7 @@ class Storage:
         self._create_backup()
 
     def _create_backup(self):
-        backup_file = os.path.join(self.backup_dir, f"tasks_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+        backup_file = os.path.join(self.backup_dir, f"tasks_backup_{date.today().strftime('%Y%m%d')}.json")
         if os.path.exists(self.file_path):
             with open(self.file_path, "r") as file:
                 data = file.read()

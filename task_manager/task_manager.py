@@ -1,8 +1,5 @@
-# task_manager/task_manager.py
-
-from .task import Task
 from .storage import Storage
-from datetime import datetime
+from datetime import date
 
 
 class TaskManager:
@@ -44,5 +41,5 @@ class TaskManager:
         return [task for task in self.tasks if task.category == category]
 
     def get_overdue_tasks(self):
-        now = datetime.now()
-        return [task for task in self.tasks if task.due_date < now and task.status != "Завершено"]
+        today = date.today()
+        return [task for task in self.tasks if task.due_date < today and task.status != "Завершено"]
