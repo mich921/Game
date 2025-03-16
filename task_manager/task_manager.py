@@ -1,6 +1,6 @@
 """Модуль для управления задачами"""
 
-from datetime import datetime
+from datetime import date
 
 from .storage import Storage
 from .task import Task
@@ -95,7 +95,7 @@ class TaskManager:
 
         :return: Список просроченных задач
         """
-        now = datetime.now()
+        now = date.today()
         return [task for task in self.tasks if task.due_date < now and task.status != "Завершено"]
 
     def search_tasks(self, keyword: str) -> list[Task]:
