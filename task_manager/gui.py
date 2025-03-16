@@ -90,8 +90,6 @@ class TaskManagerApp:
 
         ttk.Label(self.edit_task_window, text="Срок выполнения:").grid(row=2, column=0, padx=5, pady=5)
         self.edit_due_date_entry = DateEntry(self.edit_task_window, date_pattern="dd-mm-yyyy")
-        print(task.due_date)
-        print(type(task.due_date))
         self.edit_due_date_entry.set_date(task.due_date)
         self.edit_due_date_entry.grid(row=2, column=1, padx=5, pady=5)
 
