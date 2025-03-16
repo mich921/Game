@@ -14,7 +14,7 @@ class Task:
     ALL_STATUSES = ["В работе", "Завершено"]
 
     def __init__(
-            self, title: str, description: str, due_date: date,
+            self, title: str, description: str, due_date: str,
             priority=DEFAULT_PRIORITY, category=DEFAULT_CATEGORY, status=DEFAULT_STATUS
     ):
         self.title = title
