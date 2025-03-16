@@ -29,7 +29,9 @@ class TaskManagerApp:
         self.top_button_frame.pack(fill=tk.X, padx=10, pady=5)
 
         # Кнопка сброса сортировки
-        self.reset_sorting_button = ttk.Button(self.top_button_frame, text="Сбросить сортировку", command=self.reset_sorting)
+        self.reset_sorting_button = ttk.Button(
+            self.top_button_frame, text="Сбросить сортировку", command=self.reset_sorting
+        )
         self.reset_sorting_button.pack(side=tk.LEFT, padx=5)
 
         # Frame для списка задач
@@ -59,7 +61,9 @@ class TaskManagerApp:
         self.add_button.pack(side=tk.LEFT, padx=5)
 
         # Кнопка редактирования задачи
-        self.edit_button = ttk.Button(self.button_frame, text="Редактировать задачу", command=self.open_edit_task_dialog)
+        self.edit_button = ttk.Button(
+            self.button_frame, text="Редактировать задачу", command=self.open_edit_task_dialog
+        )
         self.edit_button.pack(side=tk.LEFT, padx=5)
 
         # Кнопка удаления задачи
@@ -67,11 +71,15 @@ class TaskManagerApp:
         self.delete_button.pack(side=tk.LEFT, padx=5)
 
         # Кнопка для отчета о выполненных задачах
-        self.completed_report_button = ttk.Button(self.button_frame, text="Отчет по выполненным", command=self.show_completed_report)
+        self.completed_report_button = ttk.Button(
+            self.button_frame, text="Отчет по выполненным", command=self.show_completed_report
+        )
         self.completed_report_button.pack(side=tk.LEFT, padx=5)
 
         # Кнопка для отчета о просроченных задачах
-        self.overdue_report_button = ttk.Button(self.button_frame, text="Отчет по просроченным", command=self.show_overdue_report)
+        self.overdue_report_button = ttk.Button(
+            self.button_frame, text="Отчет по просроченным", command=self.show_overdue_report
+        )
         self.overdue_report_button.pack(side=tk.LEFT, padx=5)
 
         # Кнопка для визуализации данных
@@ -147,7 +155,9 @@ class TaskManagerApp:
         self.edit_status_entry.grid(row=5, column=1, padx=5, pady=5)
 
         # Кнопка сохранения изменений
-        ttk.Button(self.edit_task_window, text="Сохранить", command=lambda: self.save_edited_task(selected_index)).grid(row=6, column=0, columnspan=2, pady=10)
+        ttk.Button(
+            self.edit_task_window, text="Сохранить", command=lambda: self.save_edited_task(selected_index)
+        ).grid(row=6, column=0, columnspan=2, pady=10)
 
     def save_edited_task(self, selected_index):
         """Сохранение изменений в задаче."""
@@ -195,7 +205,9 @@ class TaskManagerApp:
             elif self.sort_column == "Status":
                 self.sorted_tasks.sort(key=lambda x: Task.ALL_STATUSES.index(x.status), reverse=reverse)
             else:
-                self.sorted_tasks.sort(key=lambda x: getattr(x, self.sort_column.lower().replace(" ", "_")), reverse=reverse)
+                self.sorted_tasks.sort(
+                    key=lambda x: getattr(x, self.sort_column.lower().replace(" ", "_")), reverse=reverse
+                )
 
         # Очистка текущего списка задач
         for item in self.task_tree.get_children():
@@ -243,7 +255,9 @@ class TaskManagerApp:
         self.status_entry.grid(row=5, column=1, padx=5, pady=5)
 
         # Кнопка сохранения задачи
-        ttk.Button(self.add_task_window, text="Сохранить", command=self.save_task).grid(row=6, column=0, columnspan=2, pady=10)
+        ttk.Button(
+            self.add_task_window, text="Сохранить", command=self.save_task
+        ).grid(row=6, column=0, columnspan=2, pady=10)
 
     def save_task(self):
         # Получение данных из полей ввода
@@ -328,8 +342,9 @@ class TaskManagerApp:
         # Выпадающий список для выбора критерия
         ttk.Label(visualize_window, text="Выберите критерий:").pack(padx=10, pady=5)
         criteria_var = tk.StringVar(value="Категория")  # По умолчанию выбрана категория
-        criteria_combobox = ttk.Combobox(visualize_window, textvariable=criteria_var,
-                                         values=["Категория", "Приоритет", "Статус"])
+        criteria_combobox = ttk.Combobox(
+            visualize_window, textvariable=criteria_var, values=["Категория", "Приоритет", "Статус"]
+        )
         criteria_combobox.pack(padx=10, pady=5)
 
         # Кнопка для построения графика
