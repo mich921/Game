@@ -4,8 +4,9 @@ from flask import Flask, jsonify, request
 from datetime import datetime
 from typing import Any
 
-from .task_manager import TaskManager
 from .task import Task
+from .storage import Storage
+from .task_manager import TaskManager
 
 
 app = Flask(__name__)
@@ -16,7 +17,8 @@ class TaskAPI:
 
     def __init__(self) -> None:
         """Инициализация API для работы с задачами"""
-        self.task_manager = TaskManager()
+        storage = Storage()
+        self.task_manager = TaskManager(storage)
 
     def task_to_dict(self, task: Task) -> dict[str, Any]:
         """
@@ -52,9 +54,9 @@ class TaskAPI:
             if sort_column == "due_date":
                 tasks.sort(key=lambda x: x.due_date, reverse=reverse)
             elif sort_column == "priority":
-                tasks.sort(key=lambda x: Task.ALL_PRIORITIES.index(x.priority), reverse=reverse)
+                tasks.sort(key=lambda x: ["Низкий", "Средний", "Высокий"].index(x.priority), reverse=reverse)
             elif sort_column == "status":
-                tasks.sort(key=lambda x: Task.ALL_STATUSES.index(x.status), reverse=reverse)
+                tasks.sort(key=lambda x: ["В работе", "Завершено"].index(x.status), reverse=reverse)
             else:
                 tasks.sort(key=lambda x: getattr(x, sort_column), reverse=reverse)
 
@@ -147,11 +149,11 @@ class TaskAPI:
 
         data = {}
         if criteria == "category":
-            all_values = Task.ALL_CATEGORIES
+            all_values = ["Работа", "Личное", "Учеба"]
         elif criteria == "priority":
-            all_values = Task.ALL_PRIORITIES
+            all_values = ["Низкий", "Средний", "Высокий"]
         elif criteria == "status":
-            all_values = Task.ALL_STATUSES
+            all_values = ["В работе", "Завершено"]
         else:
             return jsonify({"status": "error", "message": "Недопустимый критерий"}), 400
 

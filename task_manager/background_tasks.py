@@ -4,6 +4,7 @@ import schedule
 import time
 from datetime import datetime
 
+from .storage import Storage
 from .task_manager import TaskManager
 from .email_notifier import EmailNotifier
 
@@ -13,7 +14,8 @@ def check_deadlines() -> None:
     Проверяет задачи на наличие просроченных дедлайнов и отправляет уведомления
     Если задача просрочена и не завершена, отправляет уведомление на почту
     """
-    task_manager = TaskManager()
+    storage = Storage()
+    task_manager = TaskManager(storage)
     email_notifier = EmailNotifier()
 
     tasks = task_manager.get_tasks()

@@ -6,9 +6,10 @@ import os
 from datetime import datetime
 
 from .task import Task
+from .storage_abc import AbstractStorage
 
 
-class Storage:
+class Storage(AbstractStorage):
     """Класс для работы с хранилищем задач"""
 
     def __init__(self, file_path: str = "data/tasks.json") -> None:

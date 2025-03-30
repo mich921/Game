@@ -2,16 +2,25 @@
 
 from datetime import date
 
-from .storage import Storage
 from .task import Task
+from .storage_abc import AbstractStorage
 
 
 class TaskManager:
     """Класс для управления задачами"""
 
-    def __init__(self) -> None:
+    SORT_TITLE = 'Title'
+    SORT_DESCRIPTION = 'Description'
+    SORT_DATE = 'Due Date'
+    SORT_PRIORITY = 'Priority'
+    SORT_CATEGORY = 'Category'
+    SORT_STATUS = 'Status'
+
+    ALL_SORTS = (SORT_TITLE, SORT_DESCRIPTION, SORT_DATE, SORT_PRIORITY, SORT_CATEGORY, SORT_STATUS)
+
+    def __init__(self, storage: AbstractStorage) -> None:
         """Инициализация менеджера задач"""
-        self.storage = Storage()
+        self.storage = storage
         self.tasks = self.storage.load_tasks()
 
     def add_task(self, task: Task) -> None:

@@ -6,8 +6,9 @@ from tkcalendar import DateEntry
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-from .task_manager import TaskManager
 from .task import Task
+from .storage import Storage
+from .task_manager import TaskManager
 
 
 class TaskManagerApp:
@@ -21,7 +22,8 @@ class TaskManagerApp:
         self.root.title("Менеджер задач")
         self.root.geometry("1000x800")
 
-        self.task_manager = TaskManager()
+        storage = Storage()
+        self.task_manager = TaskManager(storage)
         self.original_tasks = []  # Исходный список задач
         self.sorted_tasks = []  # Отсортированный список задач
         self.sort_column = None  # Текущий столбец для сортировки
@@ -52,15 +54,27 @@ class TaskManagerApp:
         # Treeview для отображения задач
         self.task_tree = ttk.Treeview(
             self.task_list_frame,
-            columns=("Title", "Description", "Due Date", "Priority", "Category", "Status"),
+            columns=TaskManager.ALL_SORTS,
             show="headings"
         )
-        self.task_tree.heading("Title", text="Заголовок", command=lambda: self.sort_tasks("Title"))
-        self.task_tree.heading("Description", text="Описание", command=lambda: self.sort_tasks("Description"))
-        self.task_tree.heading("Due Date", text="Срок выполнения", command=lambda: self.sort_tasks("Due Date"))
-        self.task_tree.heading("Priority", text="Приоритет", command=lambda: self.sort_tasks("Priority"))
-        self.task_tree.heading("Category", text="Категория", command=lambda: self.sort_tasks("Category"))
-        self.task_tree.heading("Status", text="Статус", command=lambda: self.sort_tasks("Status"))
+        self.task_tree.heading(
+            TaskManager.SORT_TITLE, text="Заголовок", command=lambda: self.sort_tasks(TaskManager.SORT_TITLE)
+        )
+        self.task_tree.heading(
+            TaskManager.SORT_DESCRIPTION, text="Описание", command=lambda: self.sort_tasks(TaskManager.SORT_DESCRIPTION)
+        )
+        self.task_tree.heading(
+            TaskManager.SORT_DATE, text="Срок выполнения", command=lambda: self.sort_tasks(TaskManager.SORT_DATE)
+        )
+        self.task_tree.heading(
+            TaskManager.SORT_PRIORITY, text="Приоритет", command=lambda: self.sort_tasks(TaskManager.SORT_PRIORITY)
+        )
+        self.task_tree.heading(
+            TaskManager.SORT_CATEGORY, text="Категория", command=lambda: self.sort_tasks(TaskManager.SORT_CATEGORY)
+        )
+        self.task_tree.heading(
+            TaskManager.SORT_STATUS, text="Статус", command=lambda: self.sort_tasks(TaskManager.SORT_STATUS)
+        )
         self.task_tree.pack(fill=tk.BOTH, expand=True)
 
         # Frame для кнопок управления
@@ -207,17 +221,17 @@ class TaskManagerApp:
         self.edit_due_date_entry.grid(row=2, column=1, padx=5, pady=5)
 
         ttk.Label(self.edit_task_window, text="Приоритет:").grid(row=3, column=0, padx=5, pady=5)
-        self.edit_priority_entry = ttk.Combobox(self.edit_task_window, values=Task.ALL_PRIORITIES)
+        self.edit_priority_entry = ttk.Combobox(self.edit_task_window, values=["Низкий", "Средний", "Высокий"])
         self.edit_priority_entry.set(task.priority)
         self.edit_priority_entry.grid(row=3, column=1, padx=5, pady=5)
 
         ttk.Label(self.edit_task_window, text="Категория:").grid(row=4, column=0, padx=5, pady=5)
-        self.edit_category_entry = ttk.Combobox(self.edit_task_window, values=Task.ALL_CATEGORIES)
+        self.edit_category_entry = ttk.Combobox(self.edit_task_window, values=["Работа", "Личное", "Учеба"])
         self.edit_category_entry.set(task.category)
         self.edit_category_entry.grid(row=4, column=1, padx=5, pady=5)
 
         ttk.Label(self.edit_task_window, text="Статус:").grid(row=5, column=0, padx=5, pady=5)
-        self.edit_status_entry = ttk.Combobox(self.edit_task_window, values=Task.ALL_STATUSES)
+        self.edit_status_entry = ttk.Combobox(self.edit_task_window, values=["В работе", "Завершено"])
         self.edit_status_entry.set(task.status)
         self.edit_status_entry.grid(row=5, column=1, padx=5, pady=5)
 
@@ -263,6 +277,10 @@ class TaskManagerApp:
         Обновление списка задач с учетом сортировки
         :return: None
         """
+
+        if self.sort_column and self.sort_column not in TaskManager.ALL_SORTS:
+            raise Exception('Ошибка сортировки')
+
         # Получаем исходный список задач
         self.original_tasks = self.task_manager.get_tasks()
 
@@ -272,11 +290,11 @@ class TaskManagerApp:
         # Сортировка задач (если требуется)
         if self.sort_column and self.sort_order != "default":
             reverse = self.sort_order == "desc"
-            if self.sort_column == "Due Date":
+            if self.sort_column == TaskManager.SORT_DATE:
                 self.sorted_tasks.sort(key=lambda x: x.due_date, reverse=reverse)
-            elif self.sort_column == "Priority":
+            elif self.sort_column == TaskManager.SORT_PRIORITY:
                 self.sorted_tasks.sort(key=lambda x: Task.ALL_PRIORITIES.index(x.priority), reverse=reverse)
-            elif self.sort_column == "Status":
+            elif self.sort_column == TaskManager.SORT_STATUS:
                 self.sorted_tasks.sort(key=lambda x: Task.ALL_STATUSES.index(x.status), reverse=reverse)
             else:
                 self.sorted_tasks.sort(
@@ -321,15 +339,15 @@ class TaskManagerApp:
         self.due_date_entry.grid(row=2, column=1, padx=5, pady=5)
 
         ttk.Label(self.add_task_window, text="Приоритет:").grid(row=3, column=0, padx=5, pady=5)
-        self.priority_entry = ttk.Combobox(self.add_task_window, values=Task.ALL_PRIORITIES)
+        self.priority_entry = ttk.Combobox(self.add_task_window, values=["Низкий", "Средний", "Высокий"])
         self.priority_entry.grid(row=3, column=1, padx=5, pady=5)
 
         ttk.Label(self.add_task_window, text="Категория:").grid(row=4, column=0, padx=5, pady=5)
-        self.category_entry = ttk.Combobox(self.add_task_window, values=Task.ALL_CATEGORIES)
+        self.category_entry = ttk.Combobox(self.add_task_window, values=["Работа", "Личное", "Учеба"])
         self.category_entry.grid(row=4, column=1, padx=5, pady=5)
 
         ttk.Label(self.add_task_window, text="Статус:").grid(row=5, column=0, padx=5, pady=5)
-        self.status_entry = ttk.Combobox(self.add_task_window, values=Task.ALL_STATUSES)
+        self.status_entry = ttk.Combobox(self.add_task_window, values=["В работе", "Завершено"])
         self.status_entry.grid(row=5, column=1, padx=5, pady=5)
 
         # Кнопка сохранения задачи
@@ -466,7 +484,7 @@ class TaskManagerApp:
         elif criteria == "Приоритет":
             all_values = Task.ALL_PRIORITIES
         elif criteria == "Статус":
-            all_values = Task.ALL_STATUSES
+            all_values = ["В работе", "Завершено"]
         else:
             raise Exception('Ошибка выбора отчета')
 
