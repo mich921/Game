@@ -112,6 +112,34 @@ class TaskManager:
             self.tasks
         ))
 
+    def sort_tasks(self, tasks: list[Task], sort_by: str, reverse: bool = False) -> list[Task]:
+        """
+        Сортирует список задач по указанному критерию.
+
+        :param tasks: Список задач для сортировки
+        :param sort_by: Критерий сортировки (одна из констант SORT_*)
+        :param reverse: Обратный порядок сортировки (по умолчанию False)
+        :return: Отсортированный список задач
+        :raises ValueError: Если передан неверный критерий сортировки
+        """
+        if sort_by not in self.ALL_SORTS:
+            raise ValueError(f"Недопустимый критерий сортировки: {sort_by}")
+
+        if sort_by == self.SORT_TITLE:
+            return sorted(tasks, key=lambda x: x.title, reverse=reverse)
+        elif sort_by == self.SORT_DESCRIPTION:
+            return sorted(tasks, key=lambda x: x.description, reverse=reverse)
+        elif sort_by == self.SORT_DATE:
+            return sorted(tasks, key=lambda x: x.due_date, reverse=reverse)
+        elif sort_by == self.SORT_PRIORITY:
+            return sorted(tasks, key=lambda x: Task.ALL_PRIORITIES.index(x.priority), reverse=reverse)
+        elif sort_by == self.SORT_CATEGORY:
+            return sorted(tasks, key=lambda x: x.category, reverse=reverse)
+        elif sort_by == self.SORT_STATUS:
+            return sorted(tasks, key=lambda x: Task.ALL_STATUSES.index(x.status), reverse=reverse)
+        else:
+            return tasks.copy()
+
     def search_tasks(self, keyword: str) -> list[Task]:
         """
         Ищет задачи по ключевому слову

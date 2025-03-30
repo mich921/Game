@@ -264,39 +264,22 @@ class TaskManagerApp:
         self.edit_task_window.destroy()
 
     def update_task_list(self) -> None:
-        """
-        Обновление списка задач с учетом сортировки
-        :return: None
-        """
-
-        if self.sort_column and self.sort_column not in TaskManager.ALL_SORTS:
-            raise Exception('Ошибка сортировки')
-
+        """Обновление списка задач с учетом сортировки"""
         # Получаем исходный список задач
         self.original_tasks = self.task_manager.get_tasks()
 
-        # Создаем копию списка для сортировки
-        self.sorted_tasks = self.original_tasks.copy()
-
-        # Сортировка задач (если требуется)
+        # Применяем сортировку (если нужно)
         if self.sort_column and self.sort_order != "default":
-            reverse = self.sort_order == "desc"
-            if self.sort_column == TaskManager.SORT_DATE:
-                self.sorted_tasks.sort(key=lambda x: x.due_date, reverse=reverse)
-            elif self.sort_column == TaskManager.SORT_PRIORITY:
-                self.sorted_tasks.sort(key=lambda x: Task.ALL_PRIORITIES.index(x.priority), reverse=reverse)
-            elif self.sort_column == TaskManager.SORT_STATUS:
-                self.sorted_tasks.sort(key=lambda x: Task.ALL_STATUSES.index(x.status), reverse=reverse)
-            else:
-                self.sorted_tasks.sort(
-                    key=lambda x: getattr(x, self.sort_column.lower().replace(" ", "_")), reverse=reverse
-                )
+            reverse = (self.sort_order == "desc")
+            self.sorted_tasks = self.task_manager.sort_tasks(self.original_tasks, self.sort_column, reverse)
+        else:
+            self.sorted_tasks = self.original_tasks.copy()
 
-        # Очистка текущего списка задач
+        # Очищаем Treeview
         for item in self.task_tree.get_children():
             self.task_tree.delete(item)
 
-        # Загрузка задач в Treeview
+        # Заполняем Treeview
         for task in self.sorted_tasks:
             self.task_tree.insert("", tk.END, values=(
                 task.title,
