@@ -149,11 +149,11 @@ class TaskAPI:
 
         data = {}
         if criteria == "category":
-            all_values = ["Работа", "Личное", "Учеба"]
+            all_values = Task.ALL_CATEGORIES
         elif criteria == "priority":
-            all_values = ["Низкий", "Средний", "Высокий"]
+            all_values = Task.ALL_PRIORITIES
         elif criteria == "status":
-            all_values = ["В работе", "Завершено"]
+            all_values = Task.ALL_STATUSES
         else:
             return jsonify({"status": "error", "message": "Недопустимый критерий"}), 400
 

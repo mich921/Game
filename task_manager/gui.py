@@ -221,17 +221,17 @@ class TaskManagerApp:
         self.edit_due_date_entry.grid(row=2, column=1, padx=5, pady=5)
 
         ttk.Label(self.edit_task_window, text="Приоритет:").grid(row=3, column=0, padx=5, pady=5)
-        self.edit_priority_entry = ttk.Combobox(self.edit_task_window, values=["Низкий", "Средний", "Высокий"])
+        self.edit_priority_entry = ttk.Combobox(self.edit_task_window, values=Task.ALL_PRIORITIES)
         self.edit_priority_entry.set(task.priority)
         self.edit_priority_entry.grid(row=3, column=1, padx=5, pady=5)
 
         ttk.Label(self.edit_task_window, text="Категория:").grid(row=4, column=0, padx=5, pady=5)
-        self.edit_category_entry = ttk.Combobox(self.edit_task_window, values=["Работа", "Личное", "Учеба"])
+        self.edit_category_entry = ttk.Combobox(self.edit_task_window, values=Task.ALL_CATEGORIES)
         self.edit_category_entry.set(task.category)
         self.edit_category_entry.grid(row=4, column=1, padx=5, pady=5)
 
         ttk.Label(self.edit_task_window, text="Статус:").grid(row=5, column=0, padx=5, pady=5)
-        self.edit_status_entry = ttk.Combobox(self.edit_task_window, values=["В работе", "Завершено"])
+        self.edit_status_entry = ttk.Combobox(self.edit_task_window, values=Task.ALL_STATUSES)
         self.edit_status_entry.set(task.status)
         self.edit_status_entry.grid(row=5, column=1, padx=5, pady=5)
 
@@ -246,17 +246,20 @@ class TaskManagerApp:
         :param selected_index: Индекс задачи в отсортированном списке
         :return: None
         """
-        updated_task = Task(
-            title=self.edit_title_entry.get(),
-            description=self.edit_description_entry.get(),
-            due_date=self.edit_due_date_entry.get_date(),
-            priority=self.edit_priority_entry.get(),
-            category=self.edit_category_entry.get(),
-            status=self.edit_status_entry.get()
-        )
+        try:
+            updated_task = Task(
+                title=self.edit_title_entry.get(),
+                description=self.edit_description_entry.get(),
+                due_date=self.edit_due_date_entry.get_date(),
+                priority=self.edit_priority_entry.get(),
+                category=self.edit_category_entry.get(),
+                status=self.edit_status_entry.get()
+            )
+            original_index = self.original_tasks.index(self.sorted_tasks[selected_index])
+            self.task_manager.edit_task(original_index, updated_task)
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось сохранить задачу: {e}")
 
-        original_index = self.original_tasks.index(self.sorted_tasks[selected_index])
-        self.task_manager.edit_task(original_index, updated_task)
         self.update_task_list()
         self.edit_task_window.destroy()
 
@@ -327,15 +330,15 @@ class TaskManagerApp:
         self.due_date_entry.grid(row=2, column=1, padx=5, pady=5)
 
         ttk.Label(self.add_task_window, text="Приоритет:").grid(row=3, column=0, padx=5, pady=5)
-        self.priority_entry = ttk.Combobox(self.add_task_window, values=["Низкий", "Средний", "Высокий"])
+        self.priority_entry = ttk.Combobox(self.add_task_window, values=Task.ALL_PRIORITIES)
         self.priority_entry.grid(row=3, column=1, padx=5, pady=5)
 
         ttk.Label(self.add_task_window, text="Категория:").grid(row=4, column=0, padx=5, pady=5)
-        self.category_entry = ttk.Combobox(self.add_task_window, values=["Работа", "Личное", "Учеба"])
+        self.category_entry = ttk.Combobox(self.add_task_window, values=Task.ALL_CATEGORIES)
         self.category_entry.grid(row=4, column=1, padx=5, pady=5)
 
         ttk.Label(self.add_task_window, text="Статус:").grid(row=5, column=0, padx=5, pady=5)
-        self.status_entry = ttk.Combobox(self.add_task_window, values=["В работе", "Завершено"])
+        self.status_entry = ttk.Combobox(self.add_task_window, values=Task.ALL_STATUSES)
         self.status_entry.grid(row=5, column=1, padx=5, pady=5)
 
         # Кнопка сохранения задачи
@@ -357,8 +360,11 @@ class TaskManagerApp:
         status = self.status_entry.get()
 
         # Создание новой задачи
-        new_task = Task(title, description, due_date, priority, category, status)
-        self.task_manager.add_task(new_task)
+        try:
+            new_task = Task(title, description, due_date, priority, category, status)
+            self.task_manager.add_task(new_task)
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось сохранить задачу: {e}")
 
         # Обновление списка задач
         self.update_task_list()
@@ -390,7 +396,7 @@ class TaskManagerApp:
         :return: None
         """
         # Получение выполненных задач
-        completed_tasks = [task for task in self.task_manager.get_tasks() if task.status == "Завершено"]
+        completed_tasks = self.task_manager.get_tasks_by_status("Завершено")
 
         # Отображение отчета
         report_window = tk.Toplevel(self.root)
@@ -472,7 +478,7 @@ class TaskManagerApp:
         elif criteria == "Приоритет":
             all_values = Task.ALL_PRIORITIES
         elif criteria == "Статус":
-            all_values = ["В работе", "Завершено"]
+            all_values = Task.ALL_STATUSES
         else:
             raise Exception('Ошибка выбора отчета')
 

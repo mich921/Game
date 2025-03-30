@@ -28,6 +28,25 @@ class Task:
     ALL_PRIORITIES: ClassVar[list[str]] = ["Низкий", "Средний", "Высокий"]
     ALL_STATUSES: ClassVar[list[str]] = ["В работе", "Завершено"]
 
+    def __post_init__(self):
+        if not self.title:
+            raise ValueError("Поле 'Заголовок' обязательно к заполнению")
+        if not self.description:
+            raise ValueError("Поле 'Описание' обязательно к заполнению")
+        if not self.priority:
+            raise ValueError(
+                f"Поле 'Приоритет' обязательно к заполнению и может быть только среди {Task.ALL_PRIORITIES}"
+            )
+        if not self.category:
+            raise ValueError(
+                f"Поле 'Категория' обязательно к заполнению и может быть только среди {Task.ALL_CATEGORIES}"
+            )
+        if not self.status:
+            raise ValueError(f"Поле 'Статус' обязательно к заполнению и может быть только среди {Task.ALL_STATUSES}")
+
+        if not isinstance(self.due_date, date):
+            raise TypeError("Поле 'Срок выполнения' обязательно к заполнению")
+
     def to_dict(self) -> dict:
         """Сериализация в словарь"""
         return {
