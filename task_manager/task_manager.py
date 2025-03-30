@@ -124,7 +124,7 @@ class TaskManager:
         :return: Отсортированный список задач
         :raises ValueError: Если передан неверный критерий сортировки
         """
-        if sort_by not in self.ALL_SORTS:
+        if sort_by and sort_by not in self.ALL_SORTS:
             raise ValueError(f"Недопустимый критерий сортировки: {sort_by}")
 
         if sort_by == self.SORT_TITLE:
