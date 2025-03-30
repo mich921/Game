@@ -1,6 +1,5 @@
 """Модуль для работы с хранилищем задач"""
 
-import csv
 import json
 import os
 from datetime import datetime
@@ -60,54 +59,6 @@ class Storage(AbstractStorage):
             self.save_tasks(tasks)
         else:
             raise IndexError("Недопустимый ID задачи")
-
-    def import_from_json(self, file_path: str) -> None:
-        """
-        Импортирует задачи из JSON-файла
-
-        :param file_path: Путь к JSON-файлу с задачами
-        :raises Exception: Если произошла ошибка при импорте
-        """
-        try:
-            existing_tasks = self.load_tasks()
-
-            with open(file_path, "r") as file:
-                tasks_data = json.load(file)
-                new_tasks = [Task.from_dict(task_data) for task_data in tasks_data]
-
-            combined_tasks = existing_tasks + new_tasks
-            self.save_tasks(combined_tasks)
-        except Exception as e:
-            raise Exception(f"Ошибка при импорте из JSON: {e}")
-
-    def import_from_csv(self, file_path: str) -> None:
-        """
-        Импортирует задачи из CSV-файла
-
-        :param file_path: Путь к CSV-файлу с задачами
-        :raises Exception: Если произошла ошибка при импорте
-        """
-        try:
-            existing_tasks = self.load_tasks()
-
-            new_tasks = []
-            with open(file_path, "r", encoding="utf-8") as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    task = Task(
-                        title=row["Title"],
-                        description=row["Description"],
-                        due_date=datetime.fromisoformat(row["Due Date"]),
-                        priority=row["Priority"],
-                        category=row["Category"],
-                        status=row["Status"]
-                    )
-                    new_tasks.append(task)
-
-            combined_tasks = existing_tasks + new_tasks
-            self.save_tasks(combined_tasks)
-        except Exception as e:
-            raise Exception(f"Ошибка при импорте из CSV: {e}")
 
     def _create_backup(self) -> None:
         """

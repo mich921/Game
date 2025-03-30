@@ -134,7 +134,7 @@ class TaskManagerApp:
         )
         if file_path:
             try:
-                self.task_manager.storage.import_from_json(file_path)
+                self.task_manager.import_from_json(file_path)
                 self.update_task_list()
                 messagebox.showinfo("Успех", "Задачи успешно импортированы из JSON файла")
             except Exception as e:
@@ -151,7 +151,7 @@ class TaskManagerApp:
         )
         if file_path:
             try:
-                self.task_manager.storage.import_from_csv(file_path)
+                self.task_manager.import_from_csv(file_path)
                 self.update_task_list()
                 messagebox.showinfo("Успех", "Задачи успешно импортированы из CSV файла")
             except Exception as e:

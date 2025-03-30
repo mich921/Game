@@ -1,6 +1,8 @@
 """Модуль для управления задачами с использованием функций высшего порядка"""
 
-from datetime import date
+import csv
+import json
+from datetime import date, datetime
 
 from .task import Task
 from .storage_abc import AbstractStorage
@@ -139,6 +141,52 @@ class TaskManager:
             return sorted(tasks, key=lambda x: Task.ALL_STATUSES.index(x.status), reverse=reverse)
         else:
             return tasks.copy()
+
+    def import_from_json(self, file_path: str) -> None:
+        """
+        Импортирует задачи из JSON-файла и объединяет с текущими.
+
+        :param file_path: Путь к JSON-файлу
+        :raises Exception: Если импорт не удался
+        """
+        try:
+            with open(file_path, "r") as file:
+                tasks_data = json.load(file)
+                new_tasks = [Task.from_dict(task_data) for task_data in tasks_data]
+
+            combined_tasks = self.tasks + new_tasks
+            self.storage.save_tasks(combined_tasks)
+            self.__update_tasks()  # Обновляем кэш задач
+        except Exception as e:
+            raise Exception(f"Ошибка импорта из JSON: {e}")
+
+    def import_from_csv(self, file_path: str) -> None:
+        """
+        Импортирует задачи из CSV-файла и объединяет с текущими.
+
+        :param file_path: Путь к CSV-файлу
+        :raises Exception: Если импорт не удался
+        """
+        try:
+            new_tasks = []
+            with open(file_path, "r", encoding="utf-8") as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    task = Task(
+                        title=row["Title"],
+                        description=row["Description"],
+                        due_date=datetime.fromisoformat(row["Due Date"]),
+                        priority=row["Priority"],
+                        category=row["Category"],
+                        status=row["Status"]
+                    )
+                    new_tasks.append(task)
+
+            combined_tasks = self.tasks + new_tasks
+            self.storage.save_tasks(combined_tasks)
+            self.__update_tasks()  # Обновляем кэш задач
+        except Exception as e:
+            raise Exception(f"Ошибка импорта из CSV: {e}")
 
     def search_tasks(self, keyword: str) -> list[Task]:
         """
