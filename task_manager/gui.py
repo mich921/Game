@@ -366,9 +366,15 @@ class TaskManagerApp:
             messagebox.showwarning("Предупреждение", "Выберите задачу для удаления")
             return
 
-        # Удаление задачи
-        task_id = self.task_tree.index(selected_item[0])
-        self.task_manager.delete_task(task_id)
+        # Получение индекса задачи в отсортированном списке
+        selected_index = self.task_tree.index(selected_item[0])
+        # Получение самой задачи из отсортированного списка
+        task_to_delete = self.sorted_tasks[selected_index]
+        # Находим индекс этой задачи в исходном списке
+        original_index = self.original_tasks.index(task_to_delete)
+
+        # Удаление задачи по оригинальному индексу
+        self.task_manager.delete_task(original_index)
 
         # Обновление списка задач
         self.update_task_list()
