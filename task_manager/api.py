@@ -45,22 +45,13 @@ class TaskAPI:
         :return: JSON-ответ с отсортированным списком задач
         """
         sort_column = request.args.get("sort_by", default=None)
-        sort_order = request.args.get("order", default="asc")
+        sort_order = request.args.get("order", default=False)
 
         tasks = self.task_manager.get_tasks()
 
-        if sort_column:
-            reverse = sort_order == "desc"
-            if sort_column == "due_date":
-                tasks.sort(key=lambda x: x.due_date, reverse=reverse)
-            elif sort_column == "priority":
-                tasks.sort(key=lambda x: ["Низкий", "Средний", "Высокий"].index(x.priority), reverse=reverse)
-            elif sort_column == "status":
-                tasks.sort(key=lambda x: ["В работе", "Завершено"].index(x.status), reverse=reverse)
-            else:
-                tasks.sort(key=lambda x: getattr(x, sort_column), reverse=reverse)
+        sorted_tasks = self.task_manager.sort_tasks(tasks, sort_column, sort_order)
 
-        return jsonify([self.task_to_dict(task) for task in tasks])
+        return jsonify([self.task_to_dict(task) for task in sorted_tasks])
 
     def add_task(self) -> jsonify:
         """
