@@ -17,3 +17,11 @@ class AbstractStorage(ABC):
     @abstractmethod
     def edit_task(self, task_id: int, updated_task: Task) -> None:
         pass
+
+    @abstractmethod
+    def import_from_json(self, file_path: str) -> None:
+        pass
+
+    @abstractmethod
+    def import_from_csv(self, file_path: str) -> None:
+        pass

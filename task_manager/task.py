@@ -1,49 +1,35 @@
 """Модуль для работы с задачами"""
 
-from datetime import date, datetime
+from dataclasses import dataclass
+from datetime import date
+from typing import ClassVar
 
 
+@dataclass(frozen=True)
 class Task:
     """
-    Класс, представляющий задачу.
+    Иммутабельный класс задачи.
+    Все изменения создают новый экземпляр.
     """
+    title: str
+    description: str
+    due_date: date
+    priority: str = "Средний"
+    category: str = "Работа"
+    status: str = "В работе"
+    created_at: date = date.today()
 
     DEFAULT_STATUS = 'В работе'
     DEFAULT_PRIORITY = 'Средний'
     DEFAULT_CATEGORY = 'Работа'
 
-    ALL_CATEGORIES = ["Работа", "Личное", "Учеба"]
-    ALL_PRIORITIES = ["Низкий", "Средний", "Высокий"]
-    ALL_STATUSES = ["В работе", "Завершено"]
+    # Константы класса
+    ALL_CATEGORIES: ClassVar[list[str]] = ["Работа", "Личное", "Учеба"]
+    ALL_PRIORITIES: ClassVar[list[str]] = ["Низкий", "Средний", "Высокий"]
+    ALL_STATUSES: ClassVar[list[str]] = ["В работе", "Завершено"]
 
-    def __init__(
-            self, title: str, description: str, due_date: date,
-            priority: str = DEFAULT_PRIORITY, category: str = DEFAULT_CATEGORY, status: str = DEFAULT_STATUS
-    ) -> None:
-        """
-        Инициализация задачи
-
-        :param title: Заголовок задачи
-        :param description: Описание задачи
-        :param due_date: Срок выполнения задачи
-        :param priority: Приоритет задачи. По умолчанию "Средний"
-        :param category: Категория задачи. По умолчанию "Работа"
-        :param status: Статус задачи. По умолчанию "В работе"
-        """
-        self.title = title
-        self.description = description
-        self.due_date = due_date
-        self.priority = priority
-        self.category = category
-        self.status = status
-        self.created_at = date.today()
-
-    def to_dict(self) -> dict[str, date | str | None]:
-        """
-        Преобразует задачу в словарь
-
-        :return: Словарь с данными задачи
-        """
+    def to_dict(self) -> dict:
+        """Сериализация в словарь"""
         return {
             "title": self.title,
             "description": self.description,
@@ -51,22 +37,17 @@ class Task:
             "priority": self.priority,
             "category": self.category,
             "status": self.status,
-            "created_at": datetime.now().isoformat()
+            "created_at": self.created_at.isoformat()
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, date | str | None]) -> 'Task':
-        """
-        Создает задачу из словаря
-
-        :param data: Словарь с данными задачи
-        :return: Объект задачи
-        """
+    def from_dict(cls, data: dict) -> 'Task':
+        """Десериализация из словаря"""
         return cls(
             title=data["title"],
             description=data["description"],
             due_date=date.fromisoformat(data["due_date"]),
-            priority=data["priority"],
-            category=data["category"],
-            status=data["status"]
+            priority=data.get("priority", cls.DEFAULT_PRIORITY),
+            category=data.get("category", cls.DEFAULT_CATEGORY),
+            status=data.get("status", cls.DEFAULT_STATUS)
         )

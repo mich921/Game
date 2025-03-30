@@ -1,6 +1,7 @@
 """Модуль для управления задачами"""
 
 from datetime import date
+from typing import Literal
 
 from .task import Task
 from .storage_abc import AbstractStorage
@@ -21,7 +22,16 @@ class TaskManager:
     def __init__(self, storage: AbstractStorage) -> None:
         """Инициализация менеджера задач"""
         self.storage = storage
-        self.tasks = self.storage.load_tasks()
+        self._tasks = self.storage.load_tasks()
+
+    @property
+    def tasks(self) -> list[Task]:
+        """Возвращает копию списка задач для безопасности"""
+        return self._tasks.copy()
+
+    def update_tasks(self) -> None:
+        """Полностью обновляет список задач"""
+        self._tasks = self.storage.load_tasks().copy()
 
     def add_task(self, task: Task) -> None:
         """
@@ -42,7 +52,7 @@ class TaskManager:
         """
         if 0 <= task_id < len(self.tasks):
             self.storage.edit_task(task_id, updated_task)
-            self.tasks = self.storage.load_tasks()
+            self.update_tasks()
         else:
             raise IndexError("Недопустимый ID задачи")
 

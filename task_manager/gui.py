@@ -246,30 +246,18 @@ class TaskManagerApp:
         :param selected_index: Индекс задачи в отсортированном списке
         :return: None
         """
-        # Получение данных из полей ввода
-        title = self.edit_title_entry.get()
-        description = self.edit_description_entry.get()
-        due_date = self.edit_due_date_entry.get_date()
-        priority = self.edit_priority_entry.get()
-        category = self.edit_category_entry.get()
-        status = self.edit_status_entry.get()
+        updated_task = Task(
+            title=self.edit_title_entry.get(),
+            description=self.edit_description_entry.get(),
+            due_date=self.edit_due_date_entry.get_date(),
+            priority=self.edit_priority_entry.get(),
+            category=self.edit_category_entry.get(),
+            status=self.edit_status_entry.get()
+        )
 
-        # Создание обновленной задачи
-        updated_task = Task(title, description, due_date, priority, category, status)
-
-        # Получение задачи из отсортированного списка
-        task = self.sorted_tasks[selected_index]
-
-        # Нахождение индекса задачи в исходном списке
-        original_index = self.original_tasks.index(task)
-
-        # Сохранение изменений в исходном списке
+        original_index = self.original_tasks.index(self.sorted_tasks[selected_index])
         self.task_manager.edit_task(original_index, updated_task)
-
-        # Обновление списка задач
         self.update_task_list()
-
-        # Закрытие окна редактирования
         self.edit_task_window.destroy()
 
     def update_task_list(self) -> None:
