@@ -117,7 +117,7 @@ class TaskAPI:
 
         :return: JSON-ответ с завершенными задачами
         """
-        completed_tasks = [task for task in self.task_manager.get_tasks() if task.status == "Завершено"]
+        completed_tasks = self.task_manager.get_tasks_by_status("Завершено")
         return jsonify([self.task_to_dict(task) for task in completed_tasks])
 
     def get_overdue_tasks(self) -> jsonify:
